@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import dotenv from 'dotenv'
+import { sign } from 'jsonwebtoken'
 import { generateNonce, SiweMessage } from 'siwe';
 dotenv.config();
 
@@ -17,11 +18,11 @@ app.post('/verify', async function (req, res) {
     const { message, signature } = req.body;
     const siweMessage = new SiweMessage(message);
     try {
-        await siweMessage.validate(signature);
-        res.send(true);
+        const fields = await siweMessage.validate(signature);
+        return res.json(sign({ id: fields.address, publicAddress: fields.address }, process.env.HATHORA_APP_SECRET))
     } catch {
         res.send(false);
     }
 });
 
-app.listen(3000);
+app.listen(3000, () => console.log(`hathora siwe auth server listening on port: 3000`));
