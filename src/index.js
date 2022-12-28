@@ -3,7 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv'
 import pkg from 'jsonwebtoken';
 import { generateNonce, SiweMessage } from 'siwe';
-const { sign, jwt } = pkg;
+const { sign, verify } = pkg;
 dotenv.config();
 
 const app = express();
@@ -19,7 +19,7 @@ app.get('/nonce', function (_, res) {
 
 app.post('/verify', async function (req, res) {
     console.log('verify', req.body);
-    const verifyTokenAsync = token => jwt.verify(token, process.env.HATHORA_APP_SECRET, (err, decoded) => new Promise((resolve, reject) => {
+    const verifyTokenAsync = token => verify(token, process.env.HATHORA_APP_SECRET, (err, decoded) => new Promise((resolve, reject) => {
         if (err != null) return reject(err);
         resolve(decoded);
     }))
