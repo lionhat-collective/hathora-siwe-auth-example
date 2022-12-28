@@ -26,7 +26,7 @@ app.post('/verify', async function (req, res) {
     if (!nonceToken) return res.status(400).json({ error: "Bad request" })
     const { nonce } = await verifyTokenAsync(nonceToken)
     try {
-        const fields = await siweMessage.validate(signature);
+        const fields = await siweMessage.validate(req?.body?.signature);
         if (fields.nonce !== nonce) {
             return res.status(400).json({ error: 'Invalid nonce' })
         }
