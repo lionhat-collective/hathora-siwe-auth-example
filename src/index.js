@@ -14,7 +14,7 @@ app.get('/nonce', function (_, res) {
     res.setHeader('Content-Type', 'text/plain');
     const nonce = generateNonce();
     const nonceToken = sign({ nonce }, process.env.HATHORA_APP_SECRET);
-    res.send({nonce, nonceToken});
+    return res.json({ nonce: nonce, nonceToken: nonceToken })
 });
 
 app.post('/verify', async function (req, res) {
