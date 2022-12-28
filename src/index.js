@@ -18,24 +18,21 @@ app.get('/nonce', function (_, res) {
 });
 
 app.post('/verify', async function (req, res) {
-    //log something
-    console.log('verify', req.body);
-    const { message, signature } = req.body;
-    let siweMessage;
-    try {
-        siweMessage = new SiweMessage(message);
-    } catch(e) {
-        console.log('error', e);
-        res.status(500).json({ error: "Bad request." })
-    }
-    console.log('siweMessage', siweMessage);
+    const verifyTokenAsync = token => jwt.verify(token, process.env.HATHORA_APP_SECRET, (err, decoded) => new Promise((resolve, reject) => {
+        if (err != null) return reject(err);
+        resolve(decoded);
+    }))
+    const nonceToken = req.headers['X-Nonce-Token']
+    if (!nonceToken) return res.status(400).json({ error: "Bad request" })
+    const { nonce } = await verifyTokenAsync(nonceToken)
     try {
         const fields = await siweMessage.validate(signature);
-        console.log('fields', fields);
+        if (fields.nonce !== nonce) {
+            return res.status(400).json({ error: 'Invalid nonce' })
+        }
         return res.json({ token: sign({ id: fields.address, publicAddress: fields.address }, process.env.HATHORA_APP_SECRET) })
-    } catch(e) {
-        console.log('error', e);
-        res.status(400).json({ error: e })
+    } catch {
+        res.status(400).json({ error: "Bad request." })
     }
 });
 
