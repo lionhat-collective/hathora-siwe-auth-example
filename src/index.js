@@ -1,8 +1,9 @@
 import cors from 'cors';
 import express from 'express';
 import dotenv from 'dotenv'
-import { sign } from 'jsonwebtoken'
+import pkg from 'jsonwebtoken';
 import { generateNonce, SiweMessage } from 'siwe';
+const { sign } = pkg;
 dotenv.config();
 
 const app = express();
@@ -15,14 +16,25 @@ app.get('/nonce', function (_, res) {
 });
 
 app.post('/verify', async function (req, res) {
+    //log something
+    console.log('verify', req.body);
     const { message, signature } = req.body;
-    const siweMessage = new SiweMessage(message);
+    let siweMessage;
+    try {
+        siweMessage = new SiweMessage(message);
+    } catch(e) {
+        console.log('error', e);
+        res.status(500).json({ error: "Bad request." })
+    }
+    console.log('siweMessage', siweMessage);
     try {
         const fields = await siweMessage.validate(signature);
+        console.log('fields', fields);
         return res.json({ token: sign({ id: fields.address, publicAddress: fields.address }, process.env.HATHORA_APP_SECRET) })
-    } catch {
-        res.status(400).json({ error: "Bad request." })
+    } catch(e) {
+        console.log('error', e);
+        res.status(400).json({ error: e })
     }
 });
 
-app.listen(3000, () => console.log(`hathora siwe auth server listening on port: 3000`));
+app.listen(3001, () => console.log(`hathora siwe auth server listening on port: 3001`));
