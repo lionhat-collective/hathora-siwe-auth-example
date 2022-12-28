@@ -12,7 +12,9 @@ app.use(cors());
 
 app.get('/nonce', function (_, res) {
     res.setHeader('Content-Type', 'text/plain');
-    res.send(generateNonce());
+    const nonce = generateNonce();
+    const nonceToken = sign({ nonce }, process.env.HATHORA_APP_SECRET);
+    res.send({nonce, nonceToken});
 });
 
 app.post('/verify', async function (req, res) {
