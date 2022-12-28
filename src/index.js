@@ -19,7 +19,7 @@ app.post('/verify', async function (req, res) {
     const siweMessage = new SiweMessage(message);
     try {
         const fields = await siweMessage.validate(signature);
-        return res.json(sign({ id: fields.address, publicAddress: fields.address }, process.env.HATHORA_APP_SECRET))
+        return res.json({ token: sign({ id: fields.address, publicAddress: fields.address }, process.env.HATHORA_APP_SECRET) })
     } catch {
         res.status(400).json({ error: "Bad request." })
     }
