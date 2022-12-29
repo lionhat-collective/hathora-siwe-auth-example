@@ -32,7 +32,7 @@ app.post('/verify', async function (req, res) {
         if (fields.nonce !== nonce) {
             return res.status(400).json({ error: 'Invalid nonce' })
         }
-        return res.json({ token: sign({ id: fields.address, publicAddress: fields.address }, process.env.HATHORA_APP_SECRET) })
+        return res.json({ token: sign({ id: fields.address, publicAddress: fields.address, type: "siwe" }, process.env.HATHORA_APP_SECRET) })
     } catch(e) {
         console.log('error', e);
         res.status(400).json({ error: "Bad request." })
